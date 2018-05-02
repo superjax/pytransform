@@ -1,0 +1,4 @@
+*.lyx~
+*.emergency*
+.idea/
+*.pyc
