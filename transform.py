@@ -93,13 +93,12 @@ class Transform:
 
         # exponentiate the rotation
         q_exp = Quaternion.exp(omega)
-        if th > 1e-4:
-            A = (1. - np.cos(th)) / (th * th)
-            B = (th - np.sin(th)) / (th * th * th)
-            t_exp = (I_3x3 + A*wx + B*wx.dot(wx)).dot(u)
+        if th > 1e-16:
+            B = (1. - np.cos(th)) / (th * th)
+            C = (th - np.sin(th)) / (th * th * th)
+            t_exp = (I_3x3 + B*wx + C*wx.dot(wx)).dot(u)
         else:
             t_exp = u
-
         return Transform(q_exp, t_exp)
 
     @staticmethod
@@ -107,11 +106,11 @@ class Transform:
         assert isinstance(T, Transform)
         omega = Quaternion.log(T.q)
         th = norm(omega)
-        if th > 1e-8:
+        if th > 1e-16:
             wx = skew(omega)
             A = np.sin(th)/th
             B = (1.-np.cos(th)) / (th*th)
-            V = I_3x3 - (1./ 2.)*wx + (1./(th*th)) * (1-(A/(2*B)))*(wx*wx)
+            V = I_3x3 - (1./ 2.)*wx + (1./(th*th)) * (1.-(A/(2.*B)))*(wx.dot(wx))
         else:
             V = I_3x3
         u = V.dot(T.t)
@@ -202,7 +201,9 @@ if __name__ == '__main__':
 
     # Check Log and Exp
     xi = np.random.random((6,1))
-    T_rand = Transform.exp(xi)
+    assert(norm(Transform.log(Transform.exp(xi)) - xi) < 1e-8)
+
+    
 
 
 
