@@ -145,6 +145,8 @@ class Quaternion():
     def random():
         arr = np.random.uniform(-1, 1, (4, 1))
         arr /= norm(arr)
+        if arr[0,0] < 0.0:
+            arr *= -1.0
         return Quaternion(arr)
 
     @staticmethod
@@ -264,6 +266,8 @@ class Quaternion():
 
     def otimes(self, q):
         q_new = Quaternion(__qmat_matrix__.dot(q.arr).squeeze().dot(self.arr).copy())
+        if q_new.w < 0.0:
+            q_new.arr *= -1.0
         return q_new
 
     def boxplus(self, delta):

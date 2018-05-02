@@ -24,16 +24,25 @@ class Transform:
         return self.otimes(other)
 
     def __imul__(self, other):
-        pass
+        assert isinstance(other, Transform)
+        Tnew = self.otimes(other)
+        self.q = Tnew.q
+        self.t = Tnew.t
+        return self
 
     def __add__(self, other):
-        pass
+        assert other.shape == (6,1)
+        return self.boxplus(other)
 
     def __iadd__(self, other):
-        pass
+        assert other.shape == (6,1)
+        Tnew = self.boxplus(other)
+        self.q = Tnew.q
+        self.t = Tnew.t
+        return self
 
     def __sub__(self, other):
-        pass
+        return self.boxminus(other)
 
     # Return the passive quaternion associated with this transform
     @property
@@ -123,7 +132,7 @@ class Transform:
 
     @staticmethod
     def random():
-        pass
+        return Transform(Quaternion.random(), 10*np.random.random((3,1)))
 
     @staticmethod
     def between_two_poses(T1, T2):
@@ -146,10 +155,14 @@ class Transform:
         return Transform(self.q * T.q, self.t + self.q.rotp(T.t))
 
     def boxplus(self, delta):
-        pass
+        assert delta.shape == (6,1)
+        return self.otimes(Transform.exp(delta))
 
     def boxminus(self, T2):
-        pass
+        delta = T2.inverse.otimes(self)
+        if delta.q.w < 0.0:
+            delta.q.arr *= -1.0
+        return self.log(delta)
 
     def plotlines(self):
         points = np.zeros((3,5))
@@ -158,13 +171,7 @@ class Transform:
         return points
 
 
-if __name__ == '__main__':
-    # Check Initialization and Print Functions
-    q = Quaternion.random()
-    t = np.random.random((3, 1))
-    T1 = Transform(q, t)
-
-    ## Check Inverse and Multiply functions
+if __name__ == '__main__':    ## Check Inverse and Multiply functions
     # Check a Known transform and its inverse
     T_known = Transform(Quaternion.from_axis_angle(np.array([[0, 0, 1]]).T, np.pi/4.0),
                         np.array([[1.0, 1.0, 0]]).T)
@@ -172,17 +179,6 @@ if __name__ == '__main__':
                             np.array([[0.0, -(2**0.5), 0]]).T)
     assert norm(T_known_inv.elements - T_known.inverse.elements) < 1e-8
 
-    T2 = T1.inverse
-    T3 = T1 * T2
-    assert norm(T3.q - Quaternion.Identity()) < 1e-8, "Inverse didn't work"
-    assert norm(T3.t) < 1e-8, "Inverse didn't work"
-
-    # Transforming a Vector
-    p = np.random.random((3,1))
-    assert norm(T1.transformp(T1.inverse.transformp(p)) - p) < 1e-8
-    assert norm(T1.inverse.transformp(T1.transformp(p)) - p) < 1e-8
-    assert norm(T1.transforma(T1.inverse.transforma(p)) - p) < 1e-8
-    assert norm(T1.inverse.transforma(T1.transforma(p)) - p) < 1e-8
 
     if False:
         # Plot an active and passive transformation
@@ -199,13 +195,38 @@ if __name__ == '__main__':
         plt.plot([0, p2_passive[0,0]], [0, p2_passive[1,0]], '-c')
         plt.show()
 
-    # Check Log and Exp
-    xi = np.random.random((6,1))
-    assert(norm(Transform.log(Transform.exp(xi)) - xi) < 1e-8)
+    for i in range(100):
+        T1 = Transform.random()
+        T2 = T1.inverse
+        T3 = T1 * T2
+        assert norm(T3.q - Quaternion.Identity()) < 1e-8, "Inverse didn't work"
+        assert norm(T3.t) < 1e-8, "Inverse didn't work"
 
-    
+        # Transforming a Vector
+        p = np.random.random((3,1))
+        assert norm(T1.transformp(T1.inverse.transformp(p)) - p) < 1e-8
+        assert norm(T1.inverse.transformp(T1.transformp(p)) - p) < 1e-8
+        assert norm(T1.transforma(T1.inverse.transforma(p)) - p) < 1e-8
+        assert norm(T1.inverse.transforma(T1.transforma(p)) - p) < 1e-8
 
+        # Check Log and Exp
+        xi = np.random.random((6,1))
+        assert(norm(Transform.log(Transform.exp(xi)) - xi) < 1e-8)
+        # T_random = Transform.random()
+        # assert(norm(Transform.exp(Transform.log(T_random)) - T_random) < 1e-8)
 
+        # Check boxplus and boxminus
+
+        # (x [+] 0) == x
+        T = Transform.random()
+        T2 = Transform.random()
+        assert norm((T + np.zeros((6,1))).elements - T.elements) < 1e-8
+
+        # (x [+] (x2 [-] x)) == x2
+        assert norm((T + (T2 - T)).elements - T2.elements) < 1e-8
+
+        # ((x [+] dx) [-] x) == dx
+        dT = np.random.random((6,1))
+        assert norm(((T + dT) - T) - dT)
 
     print "Transform test [PASSED]"
-    pass
