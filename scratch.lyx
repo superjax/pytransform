@@ -68,6 +68,25 @@
 
 \begin_body
 
+\begin_layout Title
+\begin_inset Formula $SE\left(3\right)$
+\end_inset
+
+ Scratch Pad
+\end_layout
+
+\begin_layout Author
+James Jackson
+\end_layout
+
+\begin_layout Standard
+This is a short document to help me understand 
+\begin_inset Formula $SE\left(3\right).$
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Nomenclature
 \end_layout
@@ -133,13 +152,14 @@ q_{a}^{b}q_{b}^{c}=q_{a}^{c}
 \end_layout
 
 \begin_layout Section
-Rigid Body Definition
+Rigid Body Transform Definition
 \end_layout
 
 \begin_layout Standard
 The weird thing here is that the rotation matrix is defined as an active
  rotation, or the passive rotation transpose.
- Note that the index is flipped.
+ Note that the subscript and superscripts are flipped as compared to the
+ transform.
  The translation is defined w.r.t the origin frame.
 \end_layout
 
@@ -262,6 +282,7 @@ by the transform
 
 \begin_layout Standard
 \begin_inset Float figure
+placement h
 wide false
 sideways false
 status open
@@ -280,7 +301,23 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Transforming a Vector
+Passive Vector Transformation - Using 
+\begin_inset Formula $T_{a}^{b}$
+\end_inset
+
+ we can find the parameterization for point 
+\begin_inset Formula $p$
+\end_inset
+
+, originally expressed in frame 
+\begin_inset Formula $b$
+\end_inset
+
+ in frame 
+\begin_inset Formula $a$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -387,6 +424,7 @@ To actively rotate and translate some point
 
 \begin_layout Standard
 \begin_inset Float figure
+placement h
 wide false
 sideways false
 status open
@@ -405,7 +443,24 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Transforming a Vector
+Active vector transformation - In active transformations, we find the coordinate
+s of a new point 
+\begin_inset Formula $p*$
+\end_inset
+
+, which is at the same location as point 
+\begin_inset Formula $p$
+\end_inset
+
+ in frame 
+\begin_inset Formula $b$
+\end_inset
+
+, but with respect to frame 
+\begin_inset Formula $a$
+\end_inset
+
+.
 \end_layout
 
 \end_inset
@@ -500,30 +555,6 @@ V & = & I+\frac{1}{2!}\left\lfloor \omega\right\rfloor _{\times}+\frac{1}{3!}\le
 
 \end_layout
 
-\begin_layout Standard
-If 
-\begin_inset Formula $\left\Vert \omega\right\Vert $
-\end_inset
-
- is small, then we need to use a linearization of 
-\begin_inset Formula $V$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-V & \approx & I+\frac{\partial}{\partial\omega}\left(\left(\frac{1-\cos\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{2}}\right)\left\lfloor \omega\right\rfloor _{\times}\right)+\frac{\partial}{\partial\omega}\left(\left(\frac{\left\Vert \omega\right\Vert -\sin\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{3}}\right)\left\lfloor \omega\right\rfloor _{\times}^{2}\right)\\
- & = & I+\frac{\partial}{\partial\omega}\left(\frac{1-\cos\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{2}}\right)\left\lfloor \omega\right\rfloor _{\times}+\left(\frac{1-\cos\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{2}}\right)\frac{\partial}{\partial\omega}\left\lfloor \omega\right\rfloor _{\times}
-\end{eqnarray*}
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 Logarithmic Map
 \end_layout
@@ -532,7 +563,7 @@ Logarithmic Map
 \begin_inset Formula 
 \[
 \log\left(T_{a}^{b}\right)=\left[\begin{array}{c}
-\frac{\theta}{2\sin\left(\theta\right)}\left(R_{b}^{a}-R_{b}^{a,T}\right)\\
+\log\left(R_{a}^{b}\right)\\
 \left(I-\frac{1}{2}\left\lfloor \omega\right\rfloor _{\times}+\frac{1}{\theta^{2}}\left(1-\frac{\theta\sin\left(\theta\right)}{2\left(1-\cos\left(\theta\right)\right)}\right)\left\lfloor \omega\right\rfloor _{\times}^{2}\right)t_{b/a}^{a}
 \end{array}\right]
 \]
