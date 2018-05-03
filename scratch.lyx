@@ -542,5 +542,144 @@ Logarithmic Map
 
 \end_layout
 
+\begin_layout Section
+\begin_inset Formula $\boxplus$
+\end_inset
+
+ and 
+\begin_inset Formula $\boxminus$
+\end_inset
+
+ Definition
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\boxplus:SE(3)\times\mathbb{R}^{6} & \to & SE(3)\\
+T,\xi & \mapsto & T\otimes\exp\left(\xi\right),\\
+\boxminus:SE(3)\times SE(3) & \to & \mathbb{R}^{6}\\
+T_{1},T_{2} & \mapsto & \log\left(T_{2}^{-1}\otimes T_{1}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Dynamics
+\end_layout
+
+\begin_layout Standard
+Here are generic dynamics in SE3
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\dot{T}_{I}^{b} & = & \left[\begin{array}{c}
+\omega_{b/I}^{b}\\
+R_{b}^{I}v_{b/I}^{b}
+\end{array}\right]\\
+\dot{v}_{b/I}^{b} & = & \left\lfloor v_{b/I}^{b}\right\rfloor _{\times}\omega_{b/I}^{b}+R_{I}^{b}g^{I}+a_{b/I}^{b}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Jacobians
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{\partial\dot{T}_{I}^{b}}{\partial T_{I}^{b}} & = & \left[\begin{array}{cc}
+0 & 0\\
+\left\lfloor v_{b/I}^{b}\right\rfloor _{\times} & 0
+\end{array}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{T}_{I}^{b}}{\partial v_{b/I}^{b}}=\left[\begin{array}{c}
+0\\
+I_{3\times3}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{T}_{I}^{b}}{\partial\omega_{b/I}^{b}}=\left[\begin{array}{c}
+I_{3\times3}\\
+0
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{b/I}^{b}}{\partial T_{I}^{b}}=\left[\begin{array}{cc}
+\left\lfloor g^{I}\right\rfloor _{\times} & 0\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{b/I}^{b}}{\partial v_{b/I}^{b}}=-\left\lfloor \omega_{b/I}^{b}\right\rfloor _{\times}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{b/I}^{b}}{\partial\omega_{b/I}^{b}}=\left\lfloor v_{b/I}^{b}\right\rfloor _{\times}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{b/I}^{b}}{\partial a_{b/I}^{b}}=I_{3\times3}
+\]
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document

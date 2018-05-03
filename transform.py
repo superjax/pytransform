@@ -31,7 +31,6 @@ class Transform:
         return self
 
     def __add__(self, other):
-        assert other.shape == (6,1)
         return self.boxplus(other)
 
     def __iadd__(self, other):
@@ -171,14 +170,25 @@ class Transform:
         return points
 
 
-if __name__ == '__main__':    ## Check Inverse and Multiply functions
+if __name__ == '__main__':
+    np.set_printoptions(precision=3, linewidth=150)
+
+    gravity = np.array([[0, 0, 9.80665]]).T
+    def Tdot(T, v, omega):
+        tdot = np.vstack((omega, T.q.rota(v)))
+        return tdot
+
+    def vdot(T, v, omega, a):
+        global gravity
+        return skew(v).dot(omega) + T.q.rotp(gravity) + a
+
+    ## Check Inverse and Multiply functions
     # Check a Known transform and its inverse
     T_known = Transform(Quaternion.from_axis_angle(np.array([[0, 0, 1]]).T, np.pi/4.0),
                         np.array([[1.0, 1.0, 0]]).T)
     T_known_inv = Transform(Quaternion.from_axis_angle(np.array([[0, 0, 1.]]).T , -np.pi/4.0),
                             np.array([[0.0, -(2**0.5), 0]]).T)
     assert norm(T_known_inv.elements - T_known.inverse.elements) < 1e-8
-
 
     if False:
         # Plot an active and passive transformation
@@ -212,21 +222,58 @@ if __name__ == '__main__':    ## Check Inverse and Multiply functions
         # Check Log and Exp
         xi = np.random.random((6,1))
         assert(norm(Transform.log(Transform.exp(xi)) - xi) < 1e-8)
-        # T_random = Transform.random()
-        # assert(norm(Transform.exp(Transform.log(T_random)) - T_random) < 1e-8)
+        T_random = Transform.random()
+        assert(norm(Transform.exp(Transform.log(T_random)) - T_random) < 1e-8)
 
         # Check boxplus and boxminus
-
         # (x [+] 0) == x
         T = Transform.random()
         T2 = Transform.random()
         assert norm((T + np.zeros((6,1))).elements - T.elements) < 1e-8
-
         # (x [+] (x2 [-] x)) == x2
         assert norm((T + (T2 - T)).elements - T2.elements) < 1e-8
-
         # ((x [+] dx) [-] x) == dx
         dT = np.random.random((6,1))
         assert norm(((T + dT) - T) - dT)
+
+        epsilon = 1e-8
+        v = np.random.random((3, 1))
+        w = np.random.random((3, 1))
+        a = np.random.random((3, 1))
+        T = Transform.Identity()
+
+        # Check dTdot/dT
+        d_dTdotdT = np.zeros((6,6))
+        a_dTdotdT = np.zeros((6,6))
+        a_dTdotdT[3:,:3] = -skew(v)
+        Tdot0= Tdot(T, v, w)
+        for i in range(6):
+            d_dTdotdT[:,i,None] = (Tdot(T + (epsilon* np.eye(6)[:,i,None]), v, w) - Tdot0)/epsilon
+        assert np.sum(np.abs(a_dTdotdT - d_dTdotdT)) < 1e-7
+
+        # Check dTdot/dv
+        d_dTdotdv = np.zeros((6,3))
+        a_dTdotdv = np.zeros((6,3))
+        a_dTdotdv[3:,:] = np.eye(3)
+        for i in range(3):
+            d_dTdotdv[:,i,None] = (Tdot(T, v+np.eye(3)[:,i,None]*epsilon, w) - Tdot0)/epsilon
+        assert np.sum(np.abs(a_dTdotdv - d_dTdotdv)) < 1e-7, (d_dTdotdv, a_dTdotdv)
+
+        # Check dTdot/dv
+        d_dTdotdw = np.zeros((6, 3))
+        a_dTdotdw = np.zeros((6, 3))
+        a_dTdotdw[:3, :] = np.eye(3)
+        for i in range(3):
+            d_dTdotdw[:, i, None] = (Tdot(T, v, w + np.eye(3)[:, i, None] * epsilon) - Tdot0) / epsilon
+        assert np.sum(np.abs(a_dTdotdw - d_dTdotdw)) < 1e-7, (d_dTdotdw, a_dTdotdw)
+
+        # Check vdot/dT
+        d_dvdotdT = np.zeros((3,6))
+        a_dvdotdT = np.zeros((3,6))
+        a_dvdotdT[:,:3] = skew(gravity)
+        vdot0 = vdot(T, v, w, a)
+        for i in range(6):
+            d_dvdotdT[:,i,None] = (vdot(T + (epsilon* np.eye(6)[:,i,None]), v, w, a) - vdot0)/epsilon
+        assert np.sum(np.abs(a_dvdotdT - a_dvdotdT)) < 1e-7, (a_dvdotdT, a_dvdotdT)
 
     print "Transform test [PASSED]"
