@@ -205,7 +205,7 @@ if __name__ == '__main__':
         plt.plot([0, p2_passive[0,0]], [0, p2_passive[1,0]], '-c')
         plt.show()
 
-    for i in range(100):
+    for j in range(100):
         T1 = Transform.random()
         T2 = T1.inverse
         T3 = T1 * T2
@@ -241,25 +241,23 @@ if __name__ == '__main__':
         w = np.random.random((3, 1))
         a = np.random.random((3, 1))
         T = Transform.random()
-        # T.t = np.zeros((3,1))
-        T.q = Quaternion.Identity()
 
         # Check dTdot/dT
         d_dTdotdT = np.zeros((6,6))
         a_dTdotdT = np.zeros((6,6))
-        a_dTdotdT[3:,:3] = -skew(v)
+        a_dTdotdT[3:,:3] = -T.q.R.T.dot(skew(v))
         Tdot0= Tdot(T, v, w)
         for i in range(6):
             d_dTdotdT[:,i,None] = (Tdot(T + (epsilon* np.eye(6)[:,i,None]), v, w) - Tdot0)/epsilon
-        assert np.sum(np.abs(a_dTdotdT - d_dTdotdT)) < 1e-7, (d_dTdotdT, a_dTdotdT)
+        assert np.sum(np.abs(a_dTdotdT - d_dTdotdT)) < 1e-6, (d_dTdotdT, a_dTdotdT, np.sum(np.abs(a_dTdotdT - d_dTdotdT)))
 
         # Check dTdot/dv
         d_dTdotdv = np.zeros((6,3))
         a_dTdotdv = np.zeros((6,3))
-        a_dTdotdv[3:,:] = np.eye(3)
+        a_dTdotdv[3:,:] = T.q.R.T
         for i in range(3):
             d_dTdotdv[:,i,None] = (Tdot(T, v+np.eye(3)[:,i,None]*epsilon, w) - Tdot0)/epsilon
-        assert np.sum(np.abs(a_dTdotdv - d_dTdotdv)) < 1e-7, (d_dTdotdv, a_dTdotdv)
+        assert np.sum(np.abs(a_dTdotdv - d_dTdotdv)) < 1e-6, (d_dTdotdv, a_dTdotdv)
 
         # Check dTdot/dv
         d_dTdotdw = np.zeros((6, 3))
