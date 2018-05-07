@@ -101,7 +101,7 @@ class Transform:
 
         # exponentiate the rotation
         q_exp = Quaternion.exp(omega)
-        if th > 1e-16:
+        if th > 1e-4:
             B = (1. - np.cos(th)) / (th * th)
             C = (th - np.sin(th)) / (th * th * th)
             t_exp = (I_3x3 + B*wx + C*wx.dot(wx)).dot(u)
@@ -240,7 +240,9 @@ if __name__ == '__main__':
         v = np.random.random((3, 1))
         w = np.random.random((3, 1))
         a = np.random.random((3, 1))
-        T = Transform.Identity()
+        T = Transform.random()
+        # T.t = np.zeros((3,1))
+        T.q = Quaternion.Identity()
 
         # Check dTdot/dT
         d_dTdotdT = np.zeros((6,6))
@@ -249,7 +251,7 @@ if __name__ == '__main__':
         Tdot0= Tdot(T, v, w)
         for i in range(6):
             d_dTdotdT[:,i,None] = (Tdot(T + (epsilon* np.eye(6)[:,i,None]), v, w) - Tdot0)/epsilon
-        assert np.sum(np.abs(a_dTdotdT - d_dTdotdT)) < 1e-7
+        assert np.sum(np.abs(a_dTdotdT - d_dTdotdT)) < 1e-7, (d_dTdotdT, a_dTdotdT)
 
         # Check dTdot/dv
         d_dTdotdv = np.zeros((6,3))

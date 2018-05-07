@@ -529,7 +529,6 @@ u
 \left\lfloor \omega\right\rfloor _{\times}^{3} & \left\lfloor \omega\right\rfloor _{\times}^{2}u\\
 0 & 0
 \end{array}\right]\\
-\\
  & = & \left[\begin{array}{cc}
 \exp\left(\left\lfloor \omega\right\rfloor _{\times}\right) & Vu\\
 0 & 1
