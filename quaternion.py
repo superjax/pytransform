@@ -130,7 +130,7 @@ class Quaternion():
 
         norm_delta = norm(delta)
 
-        if norm_delta > 1e-4:
+        if norm_delta > 1e-6:
             q_exp = np.vstack((np.array([[np.cos(norm_delta / 2.0)]]), np.sin(norm_delta / 2.0) * delta / norm_delta))
         else:
             q_exp = np.vstack((np.array([[1.0]]), delta / 2.0))
@@ -170,15 +170,14 @@ class Quaternion():
 
     # Perform an active rotation on v (same as q.R.T.dot(v), but faster)
     def rota(self, v):
-        assert v.shape[0] == 3
+        # assert v.shape[0] == 3
         skew_xyz = skew(self.arr[1:])
         t = 2.0 * skew_xyz.dot(v)
-        out = v + self.arr[0, 0] * t + skew_xyz.dot(t)
-        return out
+        return v + self.arr[0, 0] * t + skew_xyz.dot(t)
 
     # Perform a passive rotation on v (same as q.R.dot(v), but faster)
     def rotp(self, v):
-        assert v.shape[0] == 3
+        # assert v.shape[0] == 3
         skew_xyz = skew(self.arr[1:])
         t = 2.0 * skew_xyz.dot(v)
         return v - self.arr[0, 0] * t + skew_xyz.dot(t)
@@ -316,8 +315,7 @@ if __name__ == '__main__':
         oracle_q = pyquaternion.Quaternion(q.arr)
         oracle_q2 = pyquaternion.Quaternion(q2.arr)
         assert norm(oracle_q.rotation_matrix.T - q.R) < 1e-8  # make sure they create the same rotation matrix
-        assert norm((oracle_q2 * oracle_q).elements[:, None] - (
-                q2 * q).elements) < 1e-8  # make sure they do the same thing for quat multiplication
+        assert norm(Quaternion((oracle_q2 * oracle_q).elements[:,None]) - (q2 * q)) < 1e-8  # make sure they do the same thing for quat multiplication
 
         # Check equivalence of rot, rotp and R
         assert norm(q.rota(v) - q.R.T.dot(v)) < 1e-8
@@ -362,19 +360,18 @@ if __name__ == '__main__':
         # Check boxplus and boxminus
         delta1 = np.random.normal(-0.25, 0.25, (3, 1))
         delta2 = np.random.normal(-0.25, 0.25, (3, 1))
-        assert norm((q + np.zeros((3, 1))).elements - q.elements) < 1e-8
-        assert norm((q + (q2 - q)).elements - q2.elements) < 1e-8 or norm(
-            (q + (q2 - q)).elements + q2.elements) < 1e-8
+        assert norm((q + np.zeros((3, 1))) - q) < 1e-8
+        assert norm((q + (q2 - q)).elements - q2.elements) < 1e-8 or norm((q + (q2 - q)).elements + q2.elements) < 1e-8
         assert norm(((q + delta1) - q) - delta1) < 1e-8
         assert norm((q + delta1) - (q + delta1)) <= norm(delta1 - delta2)
 
         # Check iadd and imul
         qcopy = q.copy()
         qcopy += delta1
-        assert norm(qcopy.elements - (q + delta1).elements) < 1e-8
+        assert norm(qcopy - (q + delta1)) < 1e-8
         qcopy = q.copy()
         qcopy *= q2
-        assert norm(qcopy.elements - (q * q2).elements) < 1e-8
+        assert norm(qcopy - (q * q2)) < 1e-8
 
-    print "Rotation test [PASSED]"
+    print("Rotation test [PASSED]")
 

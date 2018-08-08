@@ -1,0 +1,518 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Transform Library Document
+\end_layout
+
+\begin_layout Standard
+I have defined my transform as a tuple of a quaternion 
+\begin_inset Formula $q_{a}^{b}$
+\end_inset
+
+ and a vector 
+\begin_inset Formula $t_{a/b}^{a}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Nomenclature
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+t_{a/b}^{a} &  & \mbox{Translation from \ensuremath{a} to \ensuremath{b} expressed in the \ensuremath{a} frame.}\\
+q_{a}^{b} &  & \mbox{Rotation from \ensuremath{a} to \ensuremath{b}, expressed in the \ensuremath{a} frame}\\
+T_{a}^{b} &  & \mbox{Homogenous Rigid body transform from \ensuremath{a} to \ensuremath{b}, expressed in the \ensuremath{a} frame.}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To get the rotation matrix associated with 
+\begin_inset Formula $q_{a}^{b},$
+\end_inset
+
+I use the following formula:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+R\left(q\right)=\left(2q_{w}^{2}-1\right)I-2q_{w}\left\lfloor \bar{q}\right\rfloor +2\bar{q}\bar{q}^{\top}\in\mathbb{R}^{3\times3}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Rotation Parameterization
+\end_layout
+
+\begin_layout Standard
+All rotations are assumed to be passive: that is, a rotation matrix times
+ a vector results in the same vector, represented in the destination frame
+ of the rotation matrix, or: 
+\begin_inset Formula $R_{a}^{b}t_{a/b}^{a}=t_{a/b}^{b}$
+\end_inset
+
+.
+ An active rotation is simply the transpose of a passive rotation, and the
+ active rotation of a vector results in a new vector, represented in the
+ original frame.
+\end_layout
+
+\begin_layout Standard
+Multiplying Rotation matrices must occur in backwards order
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{b}^{c}R_{a}^{b}=R_{a}^{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And quaternions multiply forwards
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+q_{a}^{b}q_{b}^{c}=q_{a}^{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Rigid Body Transform Definition
+\end_layout
+
+\begin_layout Standard
+The weird thing here is that the rotation matrix is defined as an active
+ rotation, or the passive rotation transpose.
+ Note that the subscript and superscripts are flipped as compared to the
+ transform.
+ The translation is defined w.r.t the origin frame.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b} & = & \left[\begin{array}{c}
+t_{b/a}^{a}\\
+q_{a}^{b}
+\end{array}\right]\cong\left[\begin{array}{cc}
+R_{b}^{a} & t_{b/a}^{a}\\
+0 & 1
+\end{array}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Compounding Transforms
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b}\otimes T_{b}^{c} & = & \left[\begin{array}{c}
+t_{b/a}^{a}\\
+q_{a}^{b}
+\end{array}\right]\otimes\left[\begin{array}{c}
+t_{c/b}^{b}\\
+q_{b}^{c}
+\end{array}\right]\\
+ & = & \left[\begin{array}{c}
+t_{b/a}^{a}+R\left(q_{a}^{b}\right)^{\top}t_{c/b}^{b}\\
+q_{a}^{b}*q_{b}^{c}
+\end{array}\right]\\
+T_{a}^{c} & = & \left[\begin{array}{c}
+t_{c/a}^{a}\\
+q_{a}^{c}
+\end{array}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Transformation Inverse
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b} & = & \left[\begin{array}{c}
+t_{b/a}^{a}\\
+q_{a}^{b}
+\end{array}\right]\\
+T_{a}^{b-1} & = & \left[\begin{array}{c}
+-R\left(q_{a}^{b}\right)t_{b/a}^{a}\\
+q_{a}^{b,-1}
+\end{array}\right]\\
+T_{b}^{a} & = & \left[\begin{array}{c}
+t_{a/b}^{b}\\
+q_{b}^{a}
+\end{array}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Transforming a vector
+\end_layout
+
+\begin_layout Subsection
+Passive Transformation
+\end_layout
+
+\begin_layout Standard
+To find the representation of some point 
+\begin_inset Formula $p$
+\end_inset
+
+, defined in some coordinate frame 
+\begin_inset Formula $a$
+\end_inset
+
+ in another coordinate frame 
+\begin_inset Formula $b$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/transform_vector.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Passive Vector Transformation - Using 
+\begin_inset Formula $T_{a}^{b}$
+\end_inset
+
+ we can find the parameterization for point 
+\begin_inset Formula $p$
+\end_inset
+
+, originally expressed in frame 
+\begin_inset Formula $b$
+\end_inset
+
+ in frame 
+\begin_inset Formula $a$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b}\circ r_{p/a}^{a} & = & R\left(q_{a}^{b}\right)\left(r_{p/a}^{a}-t_{b/a}^{a}\right)\\
+ & = & R\left(q_{a}^{b}\right)\left(r_{p/b}^{a}\right)\\
+ & = & r_{p/b}^{b}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The inverse transform gives us 
+\begin_inset Formula $p$
+\end_inset
+
+ in the original frame 
+\begin_inset Formula $b$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b,-1}\circ r_{p/b}^{b} & = & R\left(q_{b}^{a}\right)\left(r_{p/b}^{b}-t_{a/b}^{b}\right)\\
+ & = & R\left(q_{b}^{a}\right)\left(r_{p/a}^{b}\right)\\
+ & = & r_{p/a}^{a}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Active Transformation
+\end_layout
+
+\begin_layout Standard
+To actively rotate and translate some point 
+\begin_inset Formula $p$
+\end_inset
+
+ by a transform, multiply by transform
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/active_transform.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Active vector transformation - In active transformations, we find the coordinate
+s of a new point 
+\begin_inset Formula $p*$
+\end_inset
+
+, which is at the same location as point 
+\begin_inset Formula $p$
+\end_inset
+
+ in frame 
+\begin_inset Formula $b$
+\end_inset
+
+, but with respect to frame 
+\begin_inset Formula $a$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+T_{a}^{b}\circ r_{p/a}^{a} & = & R\left(q_{a}^{b}\right)^{\top}r_{p/a}^{a}+t_{b/a}^{a}\\
+ & = & r_{p^{\prime}/a}^{a}+t_{b/a}^{a}\\
+ & = & r_{p^{*}/a}^{a}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The inverse active transform puts us back
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T_{a}^{b,-1}\circ r_{p^{*}/a}^{a} & =R\left(q_{b}^{a}\right)^{\top}r_{p^{*}/a}^{a}-R\left(q_{a}^{b}\right)t_{a/b}^{a}\\
+ & =R\left(q_{b}^{a}\right)^{\top}\left(r_{p^{*}/a}^{a}-t_{a/b}^{a}\right)\\
+ & =R\left(q_{b}^{a}\right)^{\top}\left(r_{p^{\prime}/a}^{a}\right)\\
+ & =r_{p/a}^{a}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Exponential Map
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\exp\left[\begin{array}{c}
+\omega\\
+u
+\end{array}\right] & = & \exp\left[\begin{array}{cc}
+\left\lfloor \omega\right\rfloor _{\times} & u\\
+0 & 1
+\end{array}\right]\\
+ & = & I+\left[\begin{array}{cc}
+\left\lfloor \omega\right\rfloor _{\times} & u\\
+0 & 0
+\end{array}\right]+\frac{1}{2!}\left[\begin{array}{cc}
+\left\lfloor \omega\right\rfloor _{\times}^{2} & \left\lfloor \omega\right\rfloor _{\times}u\\
+0 & 0
+\end{array}\right]+\frac{1}{3!}\left[\begin{array}{cc}
+\left\lfloor \omega\right\rfloor _{\times}^{3} & \left\lfloor \omega\right\rfloor _{\times}^{2}u\\
+0 & 0
+\end{array}\right]\\
+ & = & \left[\begin{array}{cc}
+\exp\left(\left\lfloor \omega\right\rfloor _{\times}\right) & Vu\\
+0 & 1
+\end{array}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+V & = & I+\frac{1}{2!}\left\lfloor \omega\right\rfloor _{\times}+\frac{1}{3!}\left\lfloor \omega\right\rfloor _{\times}^{2}+\cdots\\
+ & = & I+\sum_{i=0}^{\infty}\left[\frac{\left\lfloor \omega\right\rfloor _{\times}^{2i+1}}{\left(2i+2\right)!}+\frac{\left\lfloor \omega\right\rfloor _{\times}^{2i+2}}{\left(2i+3\right)!}\right]\\
+ & = & I+\left(\sum_{i=0}^{\infty}\frac{\left(-1\right)^{i}\left\Vert \omega\right\Vert ^{2i}}{\left(2i+2\right)!}\right)\left\lfloor \omega\right\rfloor _{\times}+\left(\sum_{i=0}^{\infty}\frac{\left(-1\right)^{i}\left\Vert \omega\right\Vert ^{2i}}{\left(2i+3\right)!}\right)\left\lfloor \omega\right\rfloor _{\times}^{2}\\
+ & = & I+\left(\frac{1-\cos\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{2}}\right)\left\lfloor \omega\right\rfloor _{\times}+\left(\frac{\left\Vert \omega\right\Vert -\sin\left\Vert \omega\right\Vert }{\left\Vert \omega\right\Vert ^{3}}\right)\left\lfloor \omega\right\rfloor _{\times}^{2}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -276,4 +276,4 @@ if __name__ == '__main__':
             d_dvdotdT[:,i,None] = (vdot(T + (epsilon* np.eye(6)[:,i,None]), v, w, a) - vdot0)/epsilon
         assert np.sum(np.abs(a_dvdotdT - a_dvdotdT)) < 1e-7, (a_dvdotdT, a_dvdotdT)
 
-    print "Transform test [PASSED]"
+    print("Transform test [PASSED]")
